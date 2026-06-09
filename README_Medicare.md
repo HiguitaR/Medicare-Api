@@ -35,7 +35,7 @@ El sistema garantiza seguridad con JWT, auditoría de acciones críticas y arqui
 | Software | Versión mínima | Comando para verificar | Enlace de descarga |
 |---|---|---|---|
 | Java (JDK) | 25 LTS | `java -version` | https://adoptium.net/temurin/ |
-| Maven | 3.9+ o 4.0+ | `mvn -v` | https://maven.apache.org/download.cgi |
+| Gradle | 8.x+ | `gradle -v` | https://gradle.org/download/ |
 | Docker | 24+ | `docker --version` | https://docs.docker.com/get-docker/ |
 | Docker Compose | v2+ | `docker compose version` | Viene con Docker Desktop |
 | IntelliJ IDEA | 2025.1+ | O cualquier IDE de preferencia | https://www.jetbrains.com/idea/download/ |
@@ -60,9 +60,24 @@ git clone https://github.com/TU_USUARIO/medicare-api.git
 cd medicare-api
 ```
 
-### Paso 3.2 — Levantar las bases de datos
+### Paso 3.2 — Estructura del proyecto
 
-Crear un archivo `docker-compose.yml` en la raíz del proyecto con estos servicios:
+El proyecto utiliza **Gradle** como sistema de build. La estructura del repositorio es:
+
+```
+medicare-api/
+├── medicare/              # Módulo principal
+│   ├── build.gradle       # Archivo de build Gradle
+│   ├── settings.gradle    # Configuración de Gradle
+│   └── src/
+│       ├── main/
+│       └── test/
+└── README_Medicare.md     # Esta guía
+```
+
+### Paso 3.3 — Levantar las bases de datos
+
+Crear un archivo `docker-compose.yml` en la carpeta `medicare/` con estos servicios:
 
 **PostgreSQL** (para datos relacionales: Users, Doctors, Patients, Appointments):
 - Imagen: `postgres:17`
@@ -91,12 +106,12 @@ docker compose ps
 
 Ambos servicios deben mostrar estado `Up`.
 
-### Paso 3.3 — Inicializar el proyecto Spring Boot
+### Paso 3.4 — Inicializar el proyecto Spring Boot
 
 **Opción A — Spring Initializr (recomendada para juniors):**
 1. Ir a https://start.spring.io/
 2. Configurar:
-   - Project: Maven
+   - Project: **Gradle - Groovy**
    - Language: Java
    - Spring Boot: 4.0.6
    - Group: `com.medicare`
@@ -105,72 +120,81 @@ Ambos servicios deben mostrar estado `Up`.
    - Package name: `com.medicare.api`
    - Packaging: Jar
    - Java: 25
-3. Agregar las dependencias (ver sección 3.4)
-4. Generate → Extraer en la carpeta del proyecto
+3. Agregar las dependencias (ver sección 3.5)
+4. Generate → Extraer en la carpeta `medicare/` del proyecto
 
 **Opción B — Crear manualmente:**
-Crear la estructura de carpetas manualmente y el `pom.xml` con todas las dependencias.
+Crear la estructura de carpetas manualmente y el `build.gradle` con todas las dependencias.
 
-### Paso 3.4 — Dependencias del pom.xml
+### Paso 3.5 — Dependencias del build.gradle
 
-Agregar estas dependencias en tu `pom.xml`. Busca en https://mvnrepository.com/ la última versión estable de cada una:
+Agregar estas dependencias en tu `build.gradle`. Busca en https://mvnrepository.com/ la última versión estable de cada una:
 
 **Core de Spring Boot:**
-- `spring-boot-starter-web`
-- `spring-boot-starter-data-jpa`
-- `spring-boot-starter-data-mongodb`
-- `spring-boot-starter-security`
-- `spring-boot-starter-validation`
-- `spring-boot-starter-actuator`
+```groovy
+implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+implementation 'org.springframework.boot:spring-boot-starter-security'
+implementation 'org.springframework.boot:spring-boot-starter-validation'
+implementation 'org.springframework.boot:spring-boot-starter-actuator'
+```
 
 **Base de datos:**
-- `postgresql` (runtime)
-- `com.h2database:h2` (test)
+```groovy
+runtimeOnly 'org.postgresql:postgresql'
+testImplementation 'com.h2database:h2'
+```
 
 **Migraciones:**
-- `org.flywaydb:flyway-core`
-- `org.flywaydb:flyway-database-postgresql`
+```groovy
+implementation 'org.springframework.boot:spring-boot-starter-flyway'
+runtimeOnly 'org.flywaydb:flyway-database-postgresql'
+```
 
 **Seguridad JWT:**
-- `io.jsonwebtoken:jjwt-api` (0.12.x)
-- `io.jsonwebtoken:jjwt-impl` (runtime)
-- `io.jsonwebtoken:jjwt-jackson` (runtime)
+```groovy
+implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+```
 
 **Documentación API:**
-- `org.springdoc:springdoc-openapi-starter-webmvc-ui` (2.8.x)
+```groovy
+implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+```
 
 **MapStruct (mapeo DTO ↔ Entity):**
-- `org.mapstruct:mapstruct` (1.6.x)
-- `org.mapstruct:mapstruct-processor` (annotation processor)
+```groovy
+implementation 'org.mapstruct:mapstruct:1.6.3'
+annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+```
 
 **Resiliencia:**
-- `io.github.resilience4j:resilience4j-spring-boot3` (2.2.x)
+```groovy
+implementation 'io.github.resilience4j:resilience4j-spring-boot4:2.4.0'
+```
 
 **Logging:**
-- `org.springframework.boot:spring-boot-starter-log4j2`
-- Excluir `spring-boot-starter-logging` por defecto
+```groovy
+implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+configurations {
+    modules {
+        module("org.springframework.boot:spring-boot-starter-logging") {
+            replacedBy("org.springframework.boot:spring-boot-starter-log4j2", "Use Log4j2 instead of Logback")
+        }
+    }
+}
+```
 
 **Testing:**
-- `spring-boot-starter-test` (ya incluido)
-- `org.mockito:mockito-core`
-- `org.springframework.security:spring-security-test`
-
-### Paso 3.5 — Archivo de configuración application.yml
-
-Crear `src/main/resources/application.yml` con dos perfiles:
-
-**Perfil `default` (desarrollo):**
-- Puerto: `8080`
-- PostgreSQL: `jdbc:postgresql://localhost:5432/medicare`
-- MongoDB: `mongodb://admin:admin123@localhost:27017/medicare`
-- Flyway: habilitado
-- JWT secret: configurar una clave de al menos 256 bits
-- JWT expiration: 86400000 (24 horas en milisegundos)
-
-**Perfil `test`:**
-- Base de datos H2 en memoria
-- MongoDB deshabilitado o con embebido
-- Flyway habilitado
+```groovy
+testImplementation 'org.springframework.boot:spring-boot-starter-test'
+testImplementation 'org.springframework.boot:spring-boot-data-jpa-test'
+testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
+testImplementation 'org.springframework.security:spring-security-test'
+```
 
 ### Paso 3.6 — Estructura de paquetes
 
@@ -195,10 +219,14 @@ com.medicare.api
 └── integration/      # Consumo de APIs externas
 ```
 
-### Paso 3.7 — Verificar compilación
+### Paso 3.8 — Verificar compilación
 
 ```bash
-mvn clean compile
+# Usando Gradle
+./gradlew clean build
+
+# O usando el wrapper de Gradle si está configurado
+gradle clean build
 ```
 
 Si compila sin errores, el entorno está listo. Si hay errores de dependencias, revisar la sección de Troubleshooting (sección 9).
@@ -451,14 +479,14 @@ Si compila sin errores, el entorno está listo. Si hay errores de dependencias, 
    - Verificar Swagger UI en `http://localhost:8080/swagger-ui.html`
 
 4. **Configurar Log4j2:**
-   - Excluir `spring-boot-starter-logging` del pom.xml
+   - Excluir `spring-boot-starter-logging` del build.gradle
    - Agregar `spring-boot-starter-log4j2`
    - Crear `log4j2-spring.xml` en resources
    - Usar `logger.info()` en controllers y `logger.error()` en exception handlers
    - Ejemplo: `logger.info("Login successful for user: {}", username);`
 
 5. **Documentación del README del proyecto:**
-   - Cómo levantar el proyecto (docker compose + mvn spring-boot:run)
+   - Cómo levantar el proyecto (docker compose + ./gradlew bootRun)
    - Variables de entorno necesarias
    - Endpoints disponibles
    - Ejemplos de uso con curl o Postman
@@ -518,15 +546,16 @@ Si compila sin errores, el entorno está listo. Si hay errores de dependencias, 
 |---|---|---|
 | Framework | Spring Boot | 4.0.6 |
 | Java | JDK | 25 LTS |
+| Build Tool | Gradle | 8.x+ |
 | Seguridad | Spring Security | 7.0.5 |
 | ORM | Hibernate (via Spring Data JPA) | 7.2.x |
 | DB Relacional | PostgreSQL | 17 |
 | DB NoSQL | MongoDB | 7 |
-| Migraciones | Flyway | 10.x |
-| Mapeo DTO | MapStruct | 1.6.x |
-| JWT | jjwt | 0.12.x |
-| Resiliencia | Resilience4j | 2.2.x |
-| Documentación | SpringDoc OpenAPI | 2.8.x |
+| Migraciones | Flyway | 11.x (via Spring Boot starter) |
+| Mapeo DTO | MapStruct | 1.6.3 |
+| JWT | jjwt | 0.12.6 |
+| Resiliencia | Resilience4j | 2.4.0 |
+| Documentación | SpringDoc OpenAPI | 3.0.3 |
 | Logging | Log4j2 | via Spring Boot |
 | Testing | JUnit 5 + Mockito | via Spring Boot |
 
@@ -554,13 +583,13 @@ Si compila sin errores, el entorno está listo. Si hay errores de dependencias, 
 
 ```bash
 # Ejecutar todos los tests
-mvn test
+./gradlew test
 
 # Ejecutar tests de un archivo específico
-mvn test -Dtest=AppointmentServiceTest
+./gradlew test --tests "*AppointmentServiceTest"
 
 # Ejecutar tests con cobertura (opcional)
-mvn test jacoco:report
+./gradlew test jacocoTestReport
 ```
 
 ### Qué testear en cada hito
@@ -602,7 +631,7 @@ mvn test jacoco:report
 | `Connection refused` a PostgreSQL | Docker no está corriendo o el contenedor no levantó | Ejecutar `docker compose up -d` y verificar con `docker compose ps` |
 | `relation "users" does not exist` | Flyway no ejecutó las migraciones | Verificar que `spring.flyway.enabled=true` y que los archivos de migración están en `db/migration/` |
 | `JWT signature does not match` | El secret del token no coincide | Verificar que el `jwt.secret` en `application.yml` sea el mismo al generar y validar el token |
-| `Class not found: MapStruct` | Falta el annotation processor en Maven | Agregar `mapstruct-processor` como `<annotationProcessorPaths>` en `maven-compiler-plugin` |
+| `Class not found: MapStruct` | Falta el annotation processor en Gradle | Agregar `annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'` en build.gradle |
 | `No bean named 'securityFilterChain'` | Falta la configuración de Spring Security | Crear una clase con `@Configuration` y `@Bean` que retorne `SecurityFilterChain` |
 | `MongoTimeoutError` | MongoDB no está corriendo o credenciales incorrectas | Verificar docker compose y la URI de conexión en `application.yml` |
 | `FlywayException: Validate failed` | Se modificó una migración ya ejecutada | **Nunca modificar** un archivo de migración ya creado — crear uno nuevo con `V{next}__description.sql` |
@@ -623,6 +652,12 @@ docker compose exec postgres psql -U admin -d medicare -c "\dt"
 
 # Ver las migraciones ejecutadas
 docker compose exec postgres psql -U admin -d medicare -c "SELECT * FROM flyway_schema_history;"
+
+# Verificar dependencias del proyecto
+./gradlew dependencies
+
+# Limpiar y reconstruir
+./gradlew clean build
 ```
 
 ---
