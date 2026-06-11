@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 public class Appointment extends DateEntity{
     @Id
     @Column(name="appointment_id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idAppointment;
 
     @Enumerated(EnumType.STRING)
@@ -28,10 +28,12 @@ public class Appointment extends DateEntity{
     private LocalDateTime dateTime;
 
     @ManyToOne
+    @JoinColumn(name="patient_id")
     @JsonIgnoreProperties("appointments")
     private Patient patient;
 
     @ManyToOne
+    @JoinColumn(name="doctor_id")
     @JsonIgnoreProperties("appointments")
     private Doctor doctor;
 }
