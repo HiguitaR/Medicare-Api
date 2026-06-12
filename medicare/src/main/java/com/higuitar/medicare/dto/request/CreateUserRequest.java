@@ -1,0 +1,27 @@
+package com.higuitar.medicare.dto.request;
+
+import com.higuitar.medicare.model.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record CreateUserRequest(
+
+        @NotBlank(message = "This parameter is mandatory!")
+        @Size(max = 50, message = "The name must have 50 characters!")
+        String name,
+
+        @NotBlank(message = "This parameter is mandatory!")
+        @Size(min = 10, max = 100, message = "Must have at most 100 characters!")
+        String password,
+
+        @NotBlank(message = "This parameter is mandatory!")
+        @Email(message = "Invalid format!")
+        @Size(min = 3, max = 100, message = "Must have 100 characters!")
+        String email,
+
+        @NotNull(message = "This parameter is mandatory!")
+        Role role
+) {
+}

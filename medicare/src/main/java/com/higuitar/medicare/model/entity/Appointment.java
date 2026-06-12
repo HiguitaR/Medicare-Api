@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter
-public class Appointment extends DateEntity{
+public class Appointment{
     @Id
     @Column(name="appointment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
