@@ -9,6 +9,6 @@ public record CreateDoctorRequest(
         String specialization,
 
         @NotNull(message = "Must have a valid user id!")
-        Long idUser
+        Long userId
 ) {
 }

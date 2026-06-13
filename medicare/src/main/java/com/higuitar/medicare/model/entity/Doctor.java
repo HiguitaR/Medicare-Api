@@ -17,7 +17,7 @@ public class Doctor extends DateEntity {
     @Id
     @Column(name="doctor_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idDoctor;
+    private Long doctorId;
 
     private String specialization;
 

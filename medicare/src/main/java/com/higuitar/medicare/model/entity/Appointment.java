@@ -20,7 +20,7 @@ public class Appointment{
     @Id
     @Column(name="appointment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idAppointment;
+    private Long appointmentId;
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;

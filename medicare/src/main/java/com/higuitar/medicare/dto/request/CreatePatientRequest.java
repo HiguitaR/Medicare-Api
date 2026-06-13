@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public record CreatePatientRequest(
 
         @NotNull(message = "Must have user id!")
-        Long idUser,
+        Long UserId,
 
         @NotNull(message = "Must have a valid date format yyyy-mm-dd")
         LocalDate dateOfBirth,

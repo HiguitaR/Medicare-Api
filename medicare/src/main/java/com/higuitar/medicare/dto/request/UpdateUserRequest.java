@@ -6,8 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-public record CreateUserRequest(
-
+public record UpdateUserRequest (
         @NotBlank(message = "This parameter is mandatory!")
         @Size(max = 50, message = "The name must have 50 characters!")
         String name,

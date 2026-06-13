@@ -18,7 +18,7 @@ public class Patient extends DateEntity{
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="patient_id")
-    private Long idPatient;
+    private Long patientId;
 
     private LocalDate dateOfBirth;
 

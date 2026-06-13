@@ -16,7 +16,7 @@ public class User extends DateEntity{
     @Id
     @Column(name="user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idUser;
+    private Long userId;
 
     private String name;
 
