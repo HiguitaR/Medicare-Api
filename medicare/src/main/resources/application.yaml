@@ -20,8 +20,8 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
-  mongodb:
-    uri: mongodb://admin:admin123@localhost:27017/medicare?authSource=admin
-    database: medicare
+  data:
+    mongodb:
+      uri: mongodb://admin:admin123@localhost:27017/medicare?authSource=admin
 server:
   port: 8080
