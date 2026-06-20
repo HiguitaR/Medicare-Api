@@ -3,7 +3,7 @@ package com.higuitar.medicare.dto.response;
 import com.higuitar.medicare.model.Role;
 
 public record UserResponse(
-        Long idUser,
+        Long userId,
         String name,
         String email,
         Role role
