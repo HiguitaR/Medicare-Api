@@ -9,8 +9,14 @@ import com.higuitar.medicare.model.entity.User;
 import com.higuitar.medicare.repository.jpa.UserRepository;
 import com.higuitar.medicare.service.UserService;
 import com.higuitar.medicare.util.mapper.UserMapper;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,10 +24,23 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder pswEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(@NonNull String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email).orElseThrow(() ->
+                new UsernameNotFoundException("User not found with email: " + email));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+        );
+    }
 
     @Override
     public List<UserResponse> findAll() {
@@ -46,6 +65,7 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistException("User already exist with email: " + request.email());
         }
         User newUser = userMapper.toEntity(request);
+        newUser.setPassword(pswEncoder.encode(request.password()));
         newUser = userRepository.save(newUser);
         return userMapper.toUserResponse(newUser);
     }
