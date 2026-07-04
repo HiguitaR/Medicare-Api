@@ -12,6 +12,11 @@
         <module name="medicare.test" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="medicare" target="25" />
+      <module name="medicare.main" target="25" />
+      <module name="medicare.test" target="25" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
