@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface AppointmentService {
 
-    List<AppointmentResponse> findMyAppointment(Long userId);
+    List<AppointmentResponse> findMyAppointment();
     AppointmentResponse create(CreateAppointmentRequest request);
     AppointmentResponse cancel(Long appointmentId);
 }

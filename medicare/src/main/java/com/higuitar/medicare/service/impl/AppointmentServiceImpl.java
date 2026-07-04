@@ -6,12 +6,16 @@ import com.higuitar.medicare.exception.AppointmentConflictException;
 import com.higuitar.medicare.exception.LateCancellationException;
 import com.higuitar.medicare.exception.ResourceNotFoundException;
 import com.higuitar.medicare.exception.UnauthorizedActionException;
+import com.higuitar.medicare.model.Role;
 import com.higuitar.medicare.model.entity.Appointment;
 import com.higuitar.medicare.repository.jpa.AppointmentRepository;
 import com.higuitar.medicare.repository.jpa.DoctorRepository;
 import com.higuitar.medicare.repository.jpa.PatientRepository;
 import com.higuitar.medicare.repository.jpa.UserRepository;
 import com.higuitar.medicare.service.AppointmentService;
+import com.higuitar.medicare.util.mapper.AppointmentMapper;
+import com.higuitar.medicare.util.mapper.DoctorMapper;
+import com.higuitar.medicare.util.mapper.PatientMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,10 +35,34 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
-
+    private final AppointmentMapper appointmentMapper;
     @Override
-    public List<AppointmentResponse> findMyAppointment(Long userId) {
-        return List.of();
+    public List<AppointmentResponse> findMyAppointment() {
+
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if(user.getRole() == Role.DOCTOR) {
+            var doctor = doctorRepository.findByUser(user)
+                    .orElseThrow(() -> new ResourceNotFoundException("Doctor not found"));
+
+            return appointmentRepository.findByDoctor(doctor).stream()
+                    .map(appointmentMapper::toAppointmentResponse)
+                    .toList();
+        }else if(user.getRole() == Role.PATIENT) {
+            var patient = patientRepository.findByUser(user)
+                    .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+
+            return appointmentRepository.findByPatient(patient).stream()
+                    .map(appointmentMapper::toAppointmentResponse)
+                    .toList();
+        }else{
+            throw new UnauthorizedActionException("Unauthorized Action");
+        }
+
     }
 
     @Override
