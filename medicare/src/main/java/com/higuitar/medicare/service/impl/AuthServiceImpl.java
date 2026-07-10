@@ -9,7 +9,7 @@ import com.higuitar.medicare.model.Role;
 import com.higuitar.medicare.model.entity.User;
 import com.higuitar.medicare.repository.jpa.UserRepository;
 import com.higuitar.medicare.security.JwtService;
-import com.higuitar.medicare.service.AuthenticationService;
+import com.higuitar.medicare.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationServiceImpl implements AuthenticationService {
+public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;

@@ -3,7 +3,7 @@ package com.higuitar.medicare.controller;
 import com.higuitar.medicare.dto.request.LoginRequest;
 import com.higuitar.medicare.dto.request.RegisterRequest;
 import com.higuitar.medicare.dto.response.AuthResponse;
-import com.higuitar.medicare.service.AuthenticationService;
+import com.higuitar.medicare.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,15 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationService authenticationService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authenticationService.register(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authenticationService.login(request));
+        return ResponseEntity.ok(authService.login(request));
     }
 }
