@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18-alpine
+    image: postgres:18
     container_name: postgres-db
     restart: unless-stopped
     environment:
@@ -12,7 +12,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql
   mongodb:
-    image: mongo:8
+    image: mongo:8.3
     container_name: mongo-db
     restart: unless-stopped
     environment:

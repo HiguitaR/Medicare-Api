@@ -14,8 +14,6 @@ import com.higuitar.medicare.repository.jpa.PatientRepository;
 import com.higuitar.medicare.repository.jpa.UserRepository;
 import com.higuitar.medicare.service.AppointmentService;
 import com.higuitar.medicare.util.mapper.AppointmentMapper;
-import com.higuitar.medicare.util.mapper.DoctorMapper;
-import com.higuitar.medicare.util.mapper.PatientMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -91,13 +89,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setDateTime(request.dateTime());
         Appointment saved = appointmentRepository.save(appointment);
 
-        return new AppointmentResponse(
-                saved.getAppointmentId(),
-                saved.getStatus(),
-                saved.getDateTime(),
-                saved.getPatient().getPatientId(),
-                saved.getDoctor().getDoctorId()
-        );
+        return appointmentMapper.toAppointmentResponse(saved);
 
     }
 
@@ -119,11 +111,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointment.setStatus(CANCELLED);
         Appointment saved = appointmentRepository.save(appointment);
-        return new AppointmentResponse(
-                saved.getAppointmentId(),
-                saved.getStatus(),
-                saved.getDateTime(), saved.getPatient().getPatientId(),
-                saved.getDoctor().getDoctorId()
-        );
+        return appointmentMapper.toAppointmentResponse(saved);
     }
 }
