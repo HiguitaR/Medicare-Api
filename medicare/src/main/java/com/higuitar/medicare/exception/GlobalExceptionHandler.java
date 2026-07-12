@@ -3,7 +3,7 @@ package com.higuitar.medicare.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -39,6 +39,22 @@ public class GlobalExceptionHandler {
     public ProblemDetail unauthorizedAction(UnauthorizedActionException ex, HttpServletRequest request) {
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
         response.setTitle("Unauthorized");
+        response.setInstance(URI.create(request.getRequestURI()));
+        return response;
+    }
+
+    @ExceptionHandler(UserAlreadyExistException.class)
+    public ProblemDetail userAlreadyExist(UserAlreadyExistException ex, HttpServletRequest request) {
+        ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.CREATED, ex.getMessage());
+        response.setTitle("User Already Exist");
+        response.setInstance(URI.create(request.getRequestURI()));
+        return response;
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ProblemDetail userNotFound(UserNotFoundException ex, HttpServletRequest request) {
+        ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        response.setTitle("User Not Found");
         response.setInstance(URI.create(request.getRequestURI()));
         return response;
     }

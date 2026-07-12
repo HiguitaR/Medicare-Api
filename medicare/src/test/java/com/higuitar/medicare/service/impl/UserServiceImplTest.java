@@ -19,6 +19,7 @@ import com.higuitar.medicare.model.entity.User;
 import com.higuitar.medicare.repository.jpa.UserRepository;
 import com.higuitar.medicare.util.mapper.UserMapper;
 import com.higuitar.medicare.exception.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import static com.higuitar.medicare.model.Role.PATIENT;
 
 //Java
@@ -31,6 +32,8 @@ public class UserServiceImplTest {
     private UserRepository userRepository;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private PasswordEncoder pswEncoder;
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -53,6 +56,7 @@ public class UserServiceImplTest {
         //when
         when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
         when(userMapper.toEntity(request)).thenReturn(user);
+        when(pswEncoder.encode(request.password())).thenReturn("encodedPassword");
         when(userRepository.save(user)).thenReturn(savedEntity);
         when(userMapper.toUserResponse(savedEntity)).thenReturn(expected);
 
