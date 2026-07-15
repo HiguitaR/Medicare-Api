@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistException.class)
     public ProblemDetail userAlreadyExist(UserAlreadyExistException ex, HttpServletRequest request) {
-        ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.CREATED, ex.getMessage());
+        ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         response.setTitle("User Already Exist");
         response.setInstance(URI.create(request.getRequestURI()));
         return response;
