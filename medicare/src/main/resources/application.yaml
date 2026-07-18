@@ -23,6 +23,25 @@ spring:
   mongodb:
     uri: mongodb://admin:admin123@localhost:27017/medicare?authSource=admin
 
+
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 2s
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+    instances:
+      drugVerification:
+        base-config: default
+
 jwt:
   secret: "dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIG1lZGljYXJlIGFwaSBqd3QgdG9rZW5z"
   expiration: 86400000

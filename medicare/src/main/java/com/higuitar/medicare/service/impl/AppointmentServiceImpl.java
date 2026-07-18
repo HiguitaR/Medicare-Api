@@ -13,6 +13,7 @@ import com.higuitar.medicare.repository.jpa.DoctorRepository;
 import com.higuitar.medicare.repository.jpa.PatientRepository;
 import com.higuitar.medicare.repository.jpa.UserRepository;
 import com.higuitar.medicare.service.AppointmentService;
+import com.higuitar.medicare.service.AuditLogService;
 import com.higuitar.medicare.util.mapper.AppointmentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,6 +35,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final AppointmentMapper appointmentMapper;
+    private final AuditLogService auditLogService;
+
     @Override
     public List<AppointmentResponse> findMyAppointment() {
 
@@ -89,6 +92,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setDateTime(request.dateTime());
         Appointment saved = appointmentRepository.save(appointment);
 
+        auditLogService.logAction(user.getUserId(), "CREATE", "APPOINTMENT",
+                saved.getAppointmentId(), "Created Appointment for patient " + patient.getPatientId() +
+                "with doctor " + doctor.getUser().getName());
+
         return appointmentMapper.toAppointmentResponse(saved);
 
     }
@@ -100,6 +107,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
 
         var auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!Objects.equals(auth.getName(), appointment.getPatient().getUser().getEmail())) {
             throw new UnauthorizedActionException("Not your appointment");
@@ -111,6 +121,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointment.setStatus(CANCELLED);
         Appointment saved = appointmentRepository.save(appointment);
+
+        auditLogService.logAction(user.getUserId(), "CANCEL", "APPOINTMENT",
+                saved.getAppointmentId(), "Appointment " + appointment.getDateTime() + " Cancelled");
+
         return appointmentMapper.toAppointmentResponse(saved);
     }
 }
