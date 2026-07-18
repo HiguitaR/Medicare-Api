@@ -9,7 +9,7 @@ import java.util.List;
 public class MedicalNoteServiceImpl implements MedicalNoteService {
     @Override
     public MedicalNoteResponse create(CreateMedicalNoteRequest createMedicalNoteRequest) {
-        return null;
+
     }
 
     @Override

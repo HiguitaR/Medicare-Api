@@ -2,9 +2,6 @@ HELP.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
-!docker-compose.yml
 
 ### STS ###
 .apt_generated
@@ -15,18 +12,13 @@ build/
 .springBeans
 .sts4-cache
 bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
 .idea/
 *.iws
 *.iml
 *.ipr
-*.txt
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -34,6 +26,23 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
+/nb-configuration.xml
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+
+### Environment ###
+.env
+.env.*
+
+### OS ###
+*.DS_Store
+Thumbs.db
+
+### Vim/Temp ###
+*.swp
+*.swo
+*~
