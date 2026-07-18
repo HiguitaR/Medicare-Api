@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface MedicalNoteService {
 
-    MedicalNoteResponse create(CreateMedicalNoteRequest createMedicalNoteRequest);
+    MedicalNoteResponse create(Long appointmentId, CreateMedicalNoteRequest createMedicalNoteRequest);
     List<MedicalNoteResponse> findByPatientId(Long patientId);
 }

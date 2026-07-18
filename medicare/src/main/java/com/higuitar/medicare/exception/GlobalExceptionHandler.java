@@ -4,10 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.URI;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -55,6 +57,17 @@ public class GlobalExceptionHandler {
     public ProblemDetail userNotFound(UserNotFoundException ex, HttpServletRequest request) {
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         response.setTitle("User Not Found");
+        response.setInstance(URI.create(request.getRequestURI()));
+        return response;
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail methodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
+        String detail = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
+        response.setTitle("Validation Failed");
         response.setInstance(URI.create(request.getRequestURI()));
         return response;
     }

@@ -14,6 +14,7 @@ import com.higuitar.medicare.repository.jpa.AppointmentRepository;
 import com.higuitar.medicare.repository.jpa.DoctorRepository;
 import com.higuitar.medicare.repository.jpa.PatientRepository;
 import com.higuitar.medicare.repository.jpa.UserRepository;
+import com.higuitar.medicare.service.AuditLogService;
 import com.higuitar.medicare.util.mapper.AppointmentMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +53,8 @@ public class AppointmentServiceImplTest {
     private PatientRepository patientRepository;
     @Mock
     private AppointmentMapper appointmentMapper;
+    @Mock
+    private AuditLogService auditLogService;
     @InjectMocks
     private AppointmentServiceImpl appointmentService;
 
@@ -257,8 +260,13 @@ public class AppointmentServiceImplTest {
         patient.setPatientId(1L);
         patient.setUser(user);
 
+        User doctorUser = new User();
+        doctorUser.setUserId(1L);
+        doctorUser.setName("Dr. Smith");
+
         Doctor doctor = new Doctor();
         doctor.setDoctorId(doctorId);
+        doctor.setUser(doctorUser);
 
         Appointment appointment = new Appointment();
         appointment.setAppointmentId(1L);
@@ -420,6 +428,7 @@ public class AppointmentServiceImplTest {
                 com.higuitar.medicare.model.AppointmentStatus.CANCELLED, futureDateTime, 1L, 1L);
 
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(appointmentRepository.save(appointment)).thenReturn(appointment);
         when(appointmentMapper.toAppointmentResponse(appointment)).thenReturn(expected);
 
@@ -453,6 +462,10 @@ public class AppointmentServiceImplTest {
 
         Long appointmentId = 1L;
 
+        User otherUser = new User();
+        otherUser.setUserId(3L);
+        otherUser.setEmail(email);
+
         User ownerUser = new User();
         ownerUser.setUserId(2L);
         ownerUser.setEmail("owner@email.com");
@@ -467,6 +480,7 @@ public class AppointmentServiceImplTest {
         appointment.setPatient(patient);
 
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(otherUser));
 
         //then
         assertThrows(UnauthorizedActionException.class, () -> appointmentService.cancel(appointmentId));
@@ -497,6 +511,7 @@ public class AppointmentServiceImplTest {
         appointment.setPatient(patient);
 
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
         //then
         assertThrows(LateCancellationException.class, () -> appointmentService.cancel(appointmentId));

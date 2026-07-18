@@ -9,7 +9,8 @@ public record MedicalNoteResponse(
         String doctorName,
         String patientName,
         String notes,
-        List<Prescription> prescirption,
+        List<Prescription> prescription,
+        List<DrugResponse> drugVerification,
         List<String>symptoms,
         LocalDateTime dateTime
 ) {
