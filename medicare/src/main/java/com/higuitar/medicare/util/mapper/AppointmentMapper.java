@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface AppointmentMapper {
+    @Mapping(source = "appointmentId", target = "idAppointment")
     @Mapping(source = "patient.patientId", target = "idPatient")
     @Mapping(source = "doctor.doctorId", target = "idDoctor")
     AppointmentResponse toAppointmentResponse(Appointment appointment);

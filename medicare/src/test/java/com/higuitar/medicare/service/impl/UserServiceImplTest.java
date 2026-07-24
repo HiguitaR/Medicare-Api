@@ -177,6 +177,32 @@ public class UserServiceImplTest {
     }
 
     @Test
+    void update_User_PasswordIsEncoded(){
+        //given
+        Long userId = 1L;
+        UpdateUserRequest request = new UpdateUserRequest("Juan Modificado",
+                "newRawPassword", "juan06@email.com", PATIENT);
+        User existingUser = new User(userId, "Juan", "oldEncodedPassword",
+                "juan@email.com", PATIENT);
+        UserResponse expected = new UserResponse(userId,"Juan Modificado",
+                "juan06@email.com", PATIENT);
+
+        //when
+        when(userRepository.findByEmail(request.email())).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
+        when(pswEncoder.encode(request.password())).thenReturn("encodedPassword");
+        when(userRepository.save(existingUser)).thenReturn(existingUser);
+        when(userMapper.toUserResponse(existingUser)).thenReturn(expected);
+
+        userService.update(userId, request);
+
+        //then
+        verify(pswEncoder).encode(request.password());
+        verify(userRepository).save(existingUser);
+        assertEquals("encodedPassword", existingUser.getPassword());
+    }
+
+    @Test
     void update_EmailAlreadyTaken_ThrowsException(){
         //given
         Long userId = 1L;

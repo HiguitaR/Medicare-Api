@@ -21,6 +21,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * JPA-backed implementation of {@link UserService} that also acts as the
+ * {@link UserDetailsService} used by Spring Security, exposing accounts with
+ * {@code ROLE_}-prefixed authorities.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -83,6 +88,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
         userMapper.updateEntity(request, user);
+        user.setPassword(pswEncoder.encode(request.password()));
         return userMapper.toUserResponse(userRepository.save(user));
     }
 

@@ -1,9 +1,11 @@
 package com.higuitar.medicare.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,10 +13,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.net.URI;
 import java.util.stream.Collectors;
 
+/**
+ * Translates application and validation exceptions into RFC 7807 Problem Details
+ * responses, keeping error payloads consistent across the whole API.
+ */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(AppointmentConflictException.class)
     public ProblemDetail appointmentConflict(AppointmentConflictException ex, HttpServletRequest request) {
+        log.error("Appointment conflict at {}: {}", request.getRequestURI(), ex.getMessage());
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         response.setTitle("Appointment Conflict");
         response.setInstance(URI.create(request.getRequestURI()));
@@ -23,6 +31,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(LateCancellationException.class)
     public ProblemDetail lateCancellation(LateCancellationException ex, HttpServletRequest request) {
+        log.error("Late cancellation at {}: {}", request.getRequestURI(), ex.getMessage());
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         response.setTitle("Late Cancellation");
         response.setInstance(URI.create(request.getRequestURI()));
@@ -31,6 +40,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail resourceNotFound(ResourceNotFoundException ex, HttpServletRequest request) {
+        log.error("Resource not found at {}: {}", request.getRequestURI(), ex.getMessage());
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         response.setTitle("Resource Not Found");
         response.setInstance(URI.create(request.getRequestURI()));
@@ -39,6 +49,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizedActionException.class)
     public ProblemDetail unauthorizedAction(UnauthorizedActionException ex, HttpServletRequest request) {
+        log.error("Unauthorized action at {}: {}", request.getRequestURI(), ex.getMessage());
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
         response.setTitle("Unauthorized");
         response.setInstance(URI.create(request.getRequestURI()));
@@ -47,6 +58,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistException.class)
     public ProblemDetail userAlreadyExist(UserAlreadyExistException ex, HttpServletRequest request) {
+        log.error("User already exists at {}: {}", request.getRequestURI(), ex.getMessage());
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         response.setTitle("User Already Exist");
         response.setInstance(URI.create(request.getRequestURI()));
@@ -55,8 +67,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ProblemDetail userNotFound(UserNotFoundException ex, HttpServletRequest request) {
+        log.error("User not found at {}: {}", request.getRequestURI(), ex.getMessage());
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         response.setTitle("User Not Found");
+        response.setInstance(URI.create(request.getRequestURI()));
+        return response;
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail badCredentials(BadCredentialsException ex, HttpServletRequest request) {
+        log.error("Authentication failed at {}: {}", request.getRequestURI(), ex.getMessage());
+        ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+        response.setTitle("Authentication Failed");
         response.setInstance(URI.create(request.getRequestURI()));
         return response;
     }
@@ -66,6 +88,7 @@ public class GlobalExceptionHandler {
         String detail = ex.getBindingResult().getFieldErrors().stream()
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.joining(", "));
+        log.error("Validation failed at {}: {}", request.getRequestURI(), detail);
         ProblemDetail response = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
         response.setTitle("Validation Failed");
         response.setInstance(URI.create(request.getRequestURI()));
