@@ -11,13 +11,20 @@ import com.higuitar.medicare.repository.jpa.UserRepository;
 import com.higuitar.medicare.security.JwtService;
 import com.higuitar.medicare.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Default implementation of {@link AuthService}: hashes passwords with BCrypt,
+ * delegates credential verification to the Spring {@link AuthenticationManager}
+ * and issues tokens through {@link JwtService}.
+ */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
@@ -43,6 +50,8 @@ public class AuthServiceImpl implements AuthService {
         var userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         var token = jwtService.generateToken(userDetails);
 
+        log.info("Patient registered successfully: {}", user.getEmail());
+
         return new AuthResponse(token, user.getUserId(), user.getName(), user.getEmail(), user.getRole());
     }
 
@@ -57,6 +66,8 @@ public class AuthServiceImpl implements AuthService {
 
         var userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         var token = jwtService.generateToken(userDetails);
+
+        log.info("Login successful for user: {}", user.getEmail());
 
         return new AuthResponse(token, user.getUserId(), user.getName(), user.getEmail(), user.getRole());
     }

@@ -26,6 +26,13 @@ import java.util.Objects;
 import static com.higuitar.medicare.model.AppointmentStatus.CANCELLED;
 import static com.higuitar.medicare.model.AppointmentStatus.SCHEDULED;
 
+/**
+ * JPA-backed implementation of {@link AppointmentService}.
+ * <p>
+ * Resolves the authenticated user from the {@link SecurityContextHolder},
+ * detects overlaps with {@code findByDoctorAndDateTime} and writes an audit
+ * entry for every booking and cancellation.
+ */
 @Service
 @RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {

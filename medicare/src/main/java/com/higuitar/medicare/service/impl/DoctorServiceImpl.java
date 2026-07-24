@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
+/**
+ * JPA-backed implementation of {@link DoctorService}; creating a doctor only
+ * links the profile to an existing user, role assignment happens at user level.
+ */
 @Service
 @RequiredArgsConstructor
 public class DoctorServiceImpl implements DoctorService {

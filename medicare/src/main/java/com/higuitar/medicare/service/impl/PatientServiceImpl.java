@@ -13,6 +13,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * JPA-backed implementation of {@link PatientService}; creating a patient only
+ * links the profile to an existing user account.
+ */
 @Service
 @RequiredArgsConstructor
 public class PatientServiceImpl implements PatientService {

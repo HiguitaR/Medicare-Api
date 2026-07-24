@@ -8,6 +8,13 @@ import org.springframework.web.client.RestClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+/**
+ * Verifies prescription drugs against the public OpenFDA API using a {@link RestClient}.
+ * <p>
+ * Guarded by the {@code drugVerification} Circuit Breaker (2s timeout): when the
+ * API is down or slow, {@link #verificationFallback(String, Exception)} marks the
+ * verification as pending instead of failing the clinical note creation.
+ */
 @Component
 public class DrugVerificationClient {
 
@@ -16,6 +23,13 @@ public class DrugVerificationClient {
     RestClient restClient = RestClient.create
             ("https://api.fda.gov");
 
+    /**
+     * Queries OpenFDA for the first product matching the given active ingredient
+     * name and returns its brand name and active ingredient.
+     *
+     * @param drugName the active ingredient to search for
+     * @return the brand name and active ingredient of the first matching product
+     */
     @CircuitBreaker(name="drugVerification", fallbackMethod = "verificationFallback")
     public DrugResponse verifyDrug(String drugName){
         String json = restClient.get()
@@ -32,6 +46,14 @@ public class DrugVerificationClient {
 
     }
 
+    /**
+     * Fallback invoked by the Circuit Breaker when the OpenFDA call fails or
+     * exceeds the configured timeout; reports the verification as pending.
+     *
+     * @param drugName the drug that could not be verified
+     * @param ex       the failure that triggered the fallback
+     * @return a response marking the verification as pending
+     */
     public DrugResponse verificationFallback (String drugName, Exception ex){
         return new DrugResponse(drugName,"Medicament Verification Pending!");
     }

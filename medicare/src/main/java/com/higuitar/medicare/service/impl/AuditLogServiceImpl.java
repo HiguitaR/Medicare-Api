@@ -6,6 +6,10 @@ import com.higuitar.medicare.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * MongoDB-backed implementation of {@link AuditLogService}; each call stores
+ * one audit document describing the performed action.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuditLogServiceImpl implements AuditLogService {

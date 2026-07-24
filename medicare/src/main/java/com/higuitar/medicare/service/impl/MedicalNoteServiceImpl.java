@@ -20,6 +20,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Implementation of {@link MedicalNoteService} combining PostgreSQL (appointments,
+ * doctors, patients) with MongoDB (clinical notes) and the OpenFDA verification client.
+ * <p>
+ * The assigned-doctor rule is enforced by comparing the authenticated doctor id
+ * against the appointment's doctor id.
+ */
 @Service
 @RequiredArgsConstructor
 public class MedicalNoteServiceImpl implements MedicalNoteService {
