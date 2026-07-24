@@ -1,0 +1,365 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-0000-4000-8000-medicare0001",
+    "name": "MediCare API",
+    "description": "Hospital management API: auth with JWT, users/roles, appointments with availability validation, clinical notes in MongoDB and drug verification via OpenFDA.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "doctorToken",
+      "value": ""
+    },
+    {
+      "key": "doctorUserId",
+      "value": ""
+    },
+    {
+      "key": "doctorId",
+      "value": ""
+    },
+    {
+      "key": "patientId",
+      "value": "1"
+    },
+    {
+      "key": "appointmentId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('token', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@test.com\",\n  \"password\": \"password1234\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('token', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@test.com\",\n  \"password\": \"password1234\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('adminToken', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@test.com\",\n  \"password\": \"adminpass123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Login Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('doctorToken', pm.response.json().token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"house@test.com\",\n  \"password\": \"password1234\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Create Doctor User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('doctorUserId', pm.response.json().userId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Gregory House\",\n  \"email\": \"house@test.com\",\n  \"password\": \"password1234\",\n  \"role\": \"DOCTOR\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/users", "host": ["{{baseUrl}}"], "path": ["api", "v1", "users"] }
+          }
+        },
+        {
+          "name": "Create Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('doctorId', pm.response.json().idDoctor);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"specialization\": \"Cardiology\",\n  \"userId\": {{doctorUserId}}\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/doctors", "host": ["{{baseUrl}}"], "path": ["api", "admin", "doctors"] }
+          }
+        },
+        {
+          "name": "List Doctors",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/doctors", "host": ["{{baseUrl}}"], "path": ["api", "admin", "doctors"] }
+          }
+        },
+        {
+          "name": "List Patients",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }]
+            },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/patients", "host": ["{{baseUrl}}"], "path": ["api", "admin", "patients"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Create Appointment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('appointmentId', pm.response.json().idAppointment);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": {{doctorId}},\n  \"dateTime\": \"2026-12-01T10:00:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/appointments", "host": ["{{baseUrl}}"], "path": ["api", "appointments"] }
+          }
+        },
+        {
+          "name": "My Appointments",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/appointments/mine", "host": ["{{baseUrl}}"], "path": ["api", "appointments", "mine"] }
+          }
+        },
+        {
+          "name": "Cancel Appointment",
+          "request": {
+            "method": "PATCH",
+            "url": { "raw": "{{baseUrl}}/api/appointments/{{appointmentId}}/cancel", "host": ["{{baseUrl}}"], "path": ["api", "appointments", "{{appointmentId}}", "cancel"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Medical Notes",
+      "item": [
+        {
+          "name": "Add Clinical Note",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{doctorToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Patient presents mild headache\",\n  \"prescription\": [\n    {\n      \"name\": \"Ibuprofen\",\n      \"dosage\": \"400mg\",\n      \"frequency\": \"every 8 hours\",\n      \"duration\": \"5 days\"\n    }\n  ],\n  \"symptoms\": [\"headache\", \"fatigue\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/appointments/{{appointmentId}}/note", "host": ["{{baseUrl}}"], "path": ["api", "appointments", "{{appointmentId}}", "note"] }
+          }
+        },
+        {
+          "name": "Patient Records",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/patients/{{patientId}}/records", "host": ["{{baseUrl}}"], "path": ["api", "patients", "{{patientId}}", "records"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Error Cases",
+      "item": [
+        {
+          "name": "No Token (401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/appointments/mine", "host": ["{{baseUrl}}"], "path": ["api", "appointments", "mine"] }
+          }
+        },
+        {
+          "name": "Patient calls Admin endpoint (403)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/admin/doctors", "host": ["{{baseUrl}}"], "path": ["api", "admin", "doctors"] }
+          }
+        },
+        {
+          "name": "Duplicate Appointment (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"doctorId\": {{doctorId}},\n  \"dateTime\": \"2026-12-01T10:00:00\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/appointments", "host": ["{{baseUrl}}"], "path": ["api", "appointments"] }
+          }
+        },
+        {
+          "name": "Wrong Password (401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@test.com\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    }
+  ]
+}
