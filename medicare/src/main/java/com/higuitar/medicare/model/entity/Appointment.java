@@ -1,6 +1,5 @@
 package com.higuitar.medicare.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.higuitar.medicare.model.AppointmentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -29,11 +28,9 @@ public class Appointment extends DateEntity {
 
     @ManyToOne
     @JoinColumn(name="patient_id")
-    @JsonIgnoreProperties("appointments")
     private Patient patient;
 
     @ManyToOne
     @JoinColumn(name="doctor_id")
-    @JsonIgnoreProperties("appointments")
     private Doctor doctor;
 }
